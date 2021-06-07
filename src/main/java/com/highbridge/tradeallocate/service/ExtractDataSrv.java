@@ -10,8 +10,10 @@ import com.highbridge.tradeallocate.model.TargetAllocationModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,11 +25,12 @@ public class ExtractDataSrv implements ExtractData {
     @Override
     public <T extends Model> List<T> readCsv(Class<? extends Model> type, String fileName) {
         try {
+
+            ClassPathResource cpr = new ClassPathResource(fileName);
             CsvSchema bootstrapSchema = CsvSchema.emptySchema().withHeader();
             CsvMapper mapper = new CsvMapper();
-            File file = new ClassPathResource(fileName).getFile();
             MappingIterator<T> readValues =
-                    mapper.readerFor(type).with(bootstrapSchema).readValues(file);
+                    mapper.readerFor(type).with(bootstrapSchema).readValues(cpr.getInputStream());
             return readValues.readAll();
         } catch (IOException e) {
             log.error("Error occurred while loading object list from file " + fileName, e);

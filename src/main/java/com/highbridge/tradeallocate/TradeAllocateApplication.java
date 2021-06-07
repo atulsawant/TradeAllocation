@@ -8,7 +8,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,10 +23,10 @@ public class TradeAllocateApplication {
         TargetAllocation targetAllocation = applicationContext.getBean(TargetAllocation.class);
 
         //extracting data from the csv files
-        List<Capital> capData = extractData.readCsv(Capital.class, "capital.csv");
-        List<Holdings> holdData = extractData.readCsv(Holdings.class, "holdings.csv");
-        List<Targets> targetData = extractData.readCsv(Targets.class, "targets.csv");
-        List<Trades> tradesData = extractData.readCsv(Trades.class, "trades.csv");
+        List<Capital> capData = extractData.readCsv(Capital.class, "static/capital.csv");
+        List<Holdings> holdData = extractData.readCsv(Holdings.class, "static/holdings.csv");
+        List<Targets> targetData = extractData.readCsv(Targets.class, "static/targets.csv");
+        List<Trades> tradesData = extractData.readCsv(Trades.class, "static/trades.csv");
 
         //loading data from the csv file to a Map
         Map<String, List<TargetAllocationModel>> preTargetAllocationMap = targetAllocation.setTarAlloc(capData, holdData, targetData);
