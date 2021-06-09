@@ -12,7 +12,7 @@ public class Trades implements Model{
 
     private String stock;
     private String type;
-    private BigInteger quantity;
+    private Integer quantity;
     private BigDecimal price;
 
 }

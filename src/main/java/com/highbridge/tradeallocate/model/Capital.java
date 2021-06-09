@@ -1,8 +1,6 @@
 package com.highbridge.tradeallocate.model;
 
 import lombok.Data;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 /*

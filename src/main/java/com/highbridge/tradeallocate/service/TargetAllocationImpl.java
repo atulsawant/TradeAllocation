@@ -5,24 +5,33 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
 public class TargetAllocationImpl implements TargetAllocation {
 
+    /**
+     * @param capData
+     * @param holdData
+     * @param targetData
+     * @return
+     */
     @Override
     public Map<String, List<TargetAllocationModel>> setTarAlloc(List<Capital> capData, List<Holdings> holdData,
                                                                 List<Targets> targetData) {
 
+        // Map of Account as Key and Allocations as Value
         Map<String, List<TargetAllocationModel>> tarAllocMap = new HashMap<>();
         TargetAllocationModel targetAllocation;
 
         String cpAccount, hAccount, tAccount, hStock, tStock;
         BigDecimal cpCap, hStockPrice;
-        BigInteger hQty;
+        Integer hQty;
         Float targetP;
 
         // setting holdings data into tradeallocation model
@@ -90,12 +99,15 @@ public class TargetAllocationImpl implements TargetAllocation {
         return tarAllocMap;
     }
 
+    /**
+     * @param preTargetAllocationMap
+     * @param tradesData
+     * @return
+     */
     @Override
     public Map<String, List<TargetAllocationModel>> getTarAlloc(Map<String, List<TargetAllocationModel>> preTargetAllocationMap, List<Trades> tradesData) {
-        Map<String, List<TargetAllocationModel>> targetAllocMap = preTargetAllocationMap;
-        Map<String, List<TargetAllocationModel>> targetAllocMap2 = preTargetAllocationMap;
         //set Target market Value and Max Share
-        targetAllocMap.forEach(
+        preTargetAllocationMap.forEach(
                 (account, targetModel) -> {
                     for (TargetAllocationModel model : targetModel) {
                         model.setTarMktValue(getTarMktValue(model.getTarget(), model.getCapital()));
@@ -105,10 +117,10 @@ public class TargetAllocationImpl implements TargetAllocation {
         );
 
         // set all_in_position
-        targetAllocMap.forEach(
+        preTargetAllocationMap.forEach(
                 (account, targetModel) -> {
                     for (TargetAllocationModel model : targetModel) {
-                        targetAllocMap2.forEach(
+                        preTargetAllocationMap.forEach(
                                 (account2, targetModel2) -> {
                                     if (!account.equals(account2)) {
                                         for (TargetAllocationModel model2 : targetModel2) {
@@ -136,10 +148,10 @@ public class TargetAllocationImpl implements TargetAllocation {
         );
 
         // setting values for suggested_final_position and suggest_trade_allocation
-        targetAllocMap.forEach(
+        preTargetAllocationMap.forEach(
                 (account, targetModel) -> {
                     for (TargetAllocationModel model : targetModel) {
-                        targetAllocMap2.forEach(
+                        preTargetAllocationMap.forEach(
                                 (account2, targetModel2) -> {
                                     if (!account.equals(account2)) {
                                         for (TargetAllocationModel model2 : targetModel2) {
@@ -154,9 +166,9 @@ public class TargetAllocationImpl implements TargetAllocation {
                                                 for (TargetAllocationModel modelInv : updatedInv)
                                                     if ((modelInv.getAccount().equals(model.getAccount())) &&
                                                             (modelInv.getStock().equals(model.getStock()))) {
-                                                        model.setSugFinalPos(modelInv.getSugFinalPos());
+                                                        model.setSugFinalPos(modelInv.getSugFinalPos().setScale(0, RoundingMode.HALF_UP));
                                                         model.setSugTradeAlloc(modelInv.getSugFinalPos().
-                                                                subtract(new BigDecimal(modelInv.getQtyHeld())));
+                                                                subtract(new BigDecimal(modelInv.getQtyHeld())).setScale(0, RoundingMode.HALF_UP));
                                                     }
 
                                             }
@@ -168,43 +180,57 @@ public class TargetAllocationImpl implements TargetAllocation {
                 }
         );
 
-        return targetAllocMap;
+        return preTargetAllocationMap;
     }
 
+    /**
+     * @param tarPer
+     * @param capital
+     * @return
+     */
     @Override
     public BigDecimal getTarMktValue(Float tarPer, BigDecimal capital) {
         BigDecimal tarPer1 = BigDecimal.valueOf(tarPer);
-        BigDecimal capital1 = capital;
-
-        return tarPer1.multiply(capital1).multiply(BigDecimal.valueOf(0.01));
+        return tarPer1.multiply(capital).multiply(BigDecimal.valueOf(0.01));
     }
+
+    /**
+     * @param tarMktValue
+     * @param curStockPrice
+     * @return
+     */
 
     @Override
     public BigDecimal getMaxShares(BigDecimal tarMktValue, BigDecimal curStockPrice) {
-        BigDecimal tarMktValue1 = tarMktValue;
-        BigDecimal curStockPrice1 = curStockPrice;
-
-        return tarMktValue1.divide(curStockPrice1);
+        return tarMktValue.divide(curStockPrice);
     }
 
+    /**
+     * @param investors
+     * @param newTradeQty
+     * @return
+     */
     @Override
-    public Integer getAllPositions(List<TargetAllocationModel> investors, BigInteger newTradeQty) {
+    public Integer getAllPositions(List<TargetAllocationModel> investors, Integer newTradeQty) {
 
-        Integer totalPostn = newTradeQty.intValue();
-
-
+        int totalPostn = newTradeQty;
         for (TargetAllocationModel model : investors)
             totalPostn = totalPostn + model.getQtyHeld().intValue();
-
         return totalPostn;
 
     }
+
+    /**
+     * @param investors
+     * @param allPos
+     * @return
+     */
 
     @Override
     public List<TargetAllocationModel> getSugFinalPos(List<TargetAllocationModel> investors, Integer allPos) {
         BigDecimal sumTarMktValue = null;
         BigDecimal tempTarMktValue = null;
-        BigDecimal tmpFinalPos = null, sugFinalPos = null;
+        BigDecimal tmpFinalPos, sugFinalPos;
         List<TargetAllocationModel> investors1 = new ArrayList<>();
 
         for (TargetAllocationModel model : investors) {
@@ -214,16 +240,68 @@ public class TargetAllocationImpl implements TargetAllocation {
                 sumTarMktValue = tempTarMktValue.add(model.getTarMktValue());
         }
 
+        if (sumTarMktValue == null)
+            sumTarMktValue = tempTarMktValue;
 
         for (TargetAllocationModel model : investors) {
             tmpFinalPos = model.getTarMktValue().multiply(BigDecimal.valueOf(model.getAllPosition()));
-            sugFinalPos = tmpFinalPos.divide(sumTarMktValue, 2, RoundingMode.HALF_UP);
-            model.setSugFinalPos(sugFinalPos);
-            investors1.add(model);
+            if (tmpFinalPos != null && sumTarMktValue != null) {
+                sugFinalPos = tmpFinalPos.divide(sumTarMktValue, 2, RoundingMode.HALF_UP);
+                model.setSugFinalPos(sugFinalPos.setScale(0, RoundingMode.HALF_UP));
+                investors1.add(model);
+            }
         }
 
         return investors1;
     }
 
+    @Override
+    public List<Allocations> setAllocations(Map<String, List<TargetAllocationModel>> targetAllocMap, List<Trades> tradesDataList) {
+        final List<Allocations> allocations = new ArrayList<>();
+
+        targetAllocMap.forEach(
+                (account, targetModel) -> {
+                    for (TargetAllocationModel model : targetModel) {
+                            Allocations allocation = new Allocations();
+                            allocation.setAccount(model.getAccount());
+                            allocation.setStock(model.getStock());
+                            if(checkErrorCondition(model, tradesDataList))
+                                allocation.setQuantity("+" + model.getSugTradeAlloc().setScale(0, RoundingMode.HALF_UP).toString());
+                            else
+                                allocation.setQuantity("0");
+
+                        allocations.add(allocation);
+                    }
+                }
+        );
+        return allocations;
+    }
+
+    @Override
+    public boolean checkErrorCondition(TargetAllocationModel model, List<Trades> tradesDataList){
+
+        //ERROR Condition: SUGGESTED_FINAL_POSITION < 0
+        if(model.getSugFinalPos().intValue() < 0)
+            return false;
+        //ERROR Condition: SUGGESTED_FINAL_POSITION > MAX_SHARES
+        if(model.getSugFinalPos().compareTo(model.getMaxShares()) > 0)
+            return false;
+
+        //ERROR Condition: SUGGESTED_FINAL_POSITION < Currently Held Quantity when trade is a BUY.
+        for(Trades tradesData: tradesDataList) {
+            if ((model.getStock().equals(tradesData.getStock())) && (tradesData.getType().equals("BUY")))
+                if (model.getSugFinalPos().compareTo(model.getStockPrice()) < 0)
+                    return false;
+        }
+        //ERROR Condition: SUGGESTED_FINAL_POSITION > Currently Held Quantity when trade is a SELL.
+        for(Trades tradesData: tradesDataList) {
+            if ((model.getStock().equals(tradesData.getStock())) && (tradesData.getType().equals("SELL")))
+                if (model.getSugFinalPos().compareTo(model.getStockPrice()) > 0)
+                    return false;
+        }
+
+        return true;
+
+    }
 
 }

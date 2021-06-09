@@ -13,7 +13,7 @@ public class Holdings implements Model{
 
     private String account;
     private String stock;
-    private BigInteger quantity;
+    private Integer quantity;
     private BigDecimal price;
     private BigDecimal marketValue;
 

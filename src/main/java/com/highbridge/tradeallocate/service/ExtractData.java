@@ -1,5 +1,6 @@
 package com.highbridge.tradeallocate.service;
 
+import com.highbridge.tradeallocate.model.Allocations;
 import com.highbridge.tradeallocate.model.Model;
 import com.highbridge.tradeallocate.model.TargetAllocationModel;
 
@@ -9,4 +10,5 @@ import java.util.Map;
 public interface ExtractData {
     public <T extends Model> List<T> readCsv(Class<? extends Model> type, String fileName);
     public void writeCsv(Map<String, List<TargetAllocationModel>> targetAllocationMap);
+    public void writeCsvAlloc(List<Allocations> allocations);
 }
