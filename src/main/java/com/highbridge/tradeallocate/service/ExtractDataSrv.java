@@ -24,8 +24,7 @@ import java.util.Map;
 public class ExtractDataSrv implements ExtractData {
 
     /**
-     *
-     * @param type - type of model (Trades, Holdings, Targets, Capital) where we want to map the data from the csv files
+     * @param type     - type of model (Trades, Holdings, Targets, Capital) where we want to map the data from the csv files
      * @param fileName - the csv file name which we need to read and map it to the model.
      * @param <T>
      * @return - the model (Trades, Holdings, Targets and Capital) which is filled with data extracted from the csv files
@@ -50,7 +49,6 @@ public class ExtractDataSrv implements ExtractData {
     }
 
     /**
-     *
      * @param targetAllocationMap is the model which write to the csv file with calculated table for each account.
      */
     @Override
@@ -58,26 +56,26 @@ public class ExtractDataSrv implements ExtractData {
         List<TargetAllocationModel> finalTargetAllocList = new ArrayList<>();
 
         try {
-        targetAllocationMap.forEach(
-                (account, targetAllocationModel) -> {
-                    for (TargetAllocationModel model : targetAllocationModel) {
-                        finalTargetAllocList.add(model);
-                        log.info("final list for targetAllocation is" + model.toString());
+            targetAllocationMap.forEach(
+                    (account, targetAllocationModel) -> {
+                        for (TargetAllocationModel model : targetAllocationModel) {
+                            finalTargetAllocList.add(model);
+                            log.info("final list for targetAllocation is" + model.toString());
+                        }
                     }
-                }
-        );
+            );
 
-        // create mapper and schema
+            // create mapper and schema
 
-        CsvMapper mapper = new CsvMapper();
-        mapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
-        mapper.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
+            CsvMapper mapper = new CsvMapper();
+            mapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
+            mapper.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
 
-        CsvSchema schema = mapper.schemaFor(TargetAllocationModel.class);
-        schema = schema.withColumnSeparator('\t');
-        schema = schema.withUseHeader(true);
+            CsvSchema schema = mapper.schemaFor(TargetAllocationModel.class);
+            schema = schema.withColumnSeparator('\t');
+            schema = schema.withUseHeader(true);
 
-        // output writer
+            // output writer
             ObjectWriter myObjectWriter = mapper.writer(schema);
             File tempDir = new File("tmp/TargetAllocation");
             tempDir.mkdirs();
@@ -99,11 +97,10 @@ public class ExtractDataSrv implements ExtractData {
     }
 
     /**
-     *
      * @param allocations is the map will be written to a csv file which has calculated allocations for each account
      */
     @Override
-    public void writeCsvAlloc(List<Allocations> allocations){
+    public void writeCsvAlloc(List<Allocations> allocations) {
 
         // create mapper and schema
 

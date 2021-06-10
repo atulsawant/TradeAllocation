@@ -5,14 +5,11 @@ import com.highbridge.tradeallocate.model.Capital;
 import com.highbridge.tradeallocate.model.TargetAllocationModel;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,7 +25,7 @@ class ExtractDataSrvTest {
     static final String account = "John";
 
     @BeforeAll
-    static void setUp(){
+    static void setUp() {
         //setting up list of target allocation model
         targetAllocationModel.setAccount(account);
         targetAllocationModel.setCapital(BigDecimal.valueOf(50000));
@@ -47,6 +44,7 @@ class ExtractDataSrvTest {
         allocations.setAccount("John");
         allocations.setStock("GOOGLE");
     }
+
     @Test
     void loadObjectList() {
         List<Capital> capData = extractDataSrv.readCsv(Capital.class, "static/capital.csv");
@@ -91,9 +89,9 @@ class ExtractDataSrvTest {
     }
 
     @Test
-    void writeCsv(){
+    void writeCsv() {
 
-        extractDataSrv.writeCsv(Collections.singletonMap(account,Collections.singletonList(targetAllocationModel)));
+        extractDataSrv.writeCsv(Collections.singletonMap(account, Collections.singletonList(targetAllocationModel)));
 
         File tempDir = new File("tmp/TargetAllocation");
         tempDir.mkdirs();
@@ -102,12 +100,12 @@ class ExtractDataSrvTest {
         //test files exists and is not not empty
         assertTrue(tempDir.exists());
         assertTrue((tempFile.exists()));
-        assertTrue(tempFile.length()!=0);
+        assertTrue(tempFile.length() != 0);
 
     }
 
     @Test
-    void writeCsvAlloc(){
+    void writeCsvAlloc() {
 
         extractDataSrv.writeCsvAlloc(Collections.singletonList(allocations));
 
@@ -118,7 +116,7 @@ class ExtractDataSrvTest {
         //test files exists and is not not empty
         assertTrue(tempDir.exists());
         assertTrue((tempFile.exists()));
-        assertTrue(tempFile.length()!=0);
+        assertTrue(tempFile.length() != 0);
 
     }
 }

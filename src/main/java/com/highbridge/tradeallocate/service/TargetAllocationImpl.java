@@ -16,11 +16,11 @@ import java.util.Map;
 public class TargetAllocationImpl implements TargetAllocation {
 
     /**
-     * @param capData Capital and account info
-     * @param holdData Holdings data for a given account with information like Stock, quantity, price and market value.
+     * @param capData    Capital and account info
+     * @param holdData   Holdings data for a given account with information like Stock, quantity, price and market value.
      * @param targetData Targets data has account, stock and target percentage allocated for the account
      * @return Map of accounts which has list of records which is filled with information extracted from
-     *          csv files like Trades, Capital, Holdings and Targets
+     * csv files like Trades, Capital, Holdings and Targets
      */
     @Override
     public Map<String, List<TargetAllocationModel>> setTarAlloc(List<Capital> capData, List<Holdings> holdData,
@@ -103,9 +103,9 @@ public class TargetAllocationImpl implements TargetAllocation {
     /**
      * @param preTargetAllocationMap Map of accounts which has list of records which is filled with information
      *                               extracted from csv files like Trades, Capital, Holdings and Targets
-     * @param tradesData List of Trades data which has info like Stock, Account and target percentage.
+     * @param tradesData             List of Trades data which has info like Stock, Account and target percentage.
      * @return Map of accounts which has list of records which is filled with information extracted from
-     *         csv files like Trades, Capital, Holdings and Targets as well as calculated allocations
+     * csv files like Trades, Capital, Holdings and Targets as well as calculated allocations
      */
     @Override
     public Map<String, List<TargetAllocationModel>> getTarAlloc(Map<String, List<TargetAllocationModel>> preTargetAllocationMap, List<Trades> tradesData) {
@@ -187,7 +187,7 @@ public class TargetAllocationImpl implements TargetAllocation {
     }
 
     /**
-     * @param tarPer Target Percentage for a given account for a given stock
+     * @param tarPer  Target Percentage for a given account for a given stock
      * @param capital Capital amount for a given account
      * @return Calculated Target Market Value for the given account and stock
      */
@@ -199,8 +199,7 @@ public class TargetAllocationImpl implements TargetAllocation {
 
 
     /**
-     *
-     * @param tarMktValue calculated target market value for a given account
+     * @param tarMktValue   calculated target market value for a given account
      * @param curStockPrice current stock price for a given stock
      * @return Calculated Maxixum Share for a given account and stock
      */
@@ -210,7 +209,7 @@ public class TargetAllocationImpl implements TargetAllocation {
     }
 
     /**
-     * @param investors list of calculated allocation table for each account
+     * @param investors   list of calculated allocation table for each account
      * @param newTradeQty a trade quality allocated to be bought/sold for a given account
      * @return calculated all in position for a given account and stock.
      */
@@ -226,7 +225,7 @@ public class TargetAllocationImpl implements TargetAllocation {
 
     /**
      * @param investors list of calculated allocation table for each account
-     * @param allPos calculated all in position for a given account and stock
+     * @param allPos    calculated all in position for a given account and stock
      * @return calculated suggestion final position for a given account and stock
      */
 
@@ -260,7 +259,6 @@ public class TargetAllocationImpl implements TargetAllocation {
     }
 
     /**
-     *
      * @param targetAllocMap list of calculated allocation table for each account
      * @param tradesDataList List of Trades retrieved from Trades csv
      * @return Calculated for Allocation for a given account and the stock
@@ -272,13 +270,13 @@ public class TargetAllocationImpl implements TargetAllocation {
         targetAllocMap.forEach(
                 (account, targetModel) -> {
                     for (TargetAllocationModel model : targetModel) {
-                            Allocations allocation = new Allocations();
-                            allocation.setAccount(model.getAccount());
-                            allocation.setStock(model.getStock());
-                            if(checkErrorCondition(model, tradesDataList))
-                                allocation.setQuantity("+" + model.getSugTradeAlloc().setScale(0, RoundingMode.HALF_UP).toString());
-                            else
-                                allocation.setQuantity("0");
+                        Allocations allocation = new Allocations();
+                        allocation.setAccount(model.getAccount());
+                        allocation.setStock(model.getStock());
+                        if (checkErrorCondition(model, tradesDataList))
+                            allocation.setQuantity("+" + model.getSugTradeAlloc().setScale(0, RoundingMode.HALF_UP).toString());
+                        else
+                            allocation.setQuantity("0");
 
                         allocations.add(allocation);
                     }
@@ -288,29 +286,28 @@ public class TargetAllocationImpl implements TargetAllocation {
     }
 
     /**
-     *
-     * @param model Calculated target allocation for a given account and stock
+     * @param model          Calculated target allocation for a given account and stock
      * @param tradesDataList List of Trades retrieved from Trades csv
      * @return true or false based on error checks condition over the calculated values.
      */
     @Override
-    public boolean checkErrorCondition(TargetAllocationModel model, List<Trades> tradesDataList){
+    public boolean checkErrorCondition(TargetAllocationModel model, List<Trades> tradesDataList) {
 
         //ERROR Condition: SUGGESTED_FINAL_POSITION < 0
-        if(model.getSugFinalPos().intValue() < 0)
+        if (model.getSugFinalPos().intValue() < 0)
             return false;
         //ERROR Condition: SUGGESTED_FINAL_POSITION > MAX_SHARES
-        if(model.getSugFinalPos().compareTo(model.getMaxShares()) > 0)
+        if (model.getSugFinalPos().compareTo(model.getMaxShares()) > 0)
             return false;
 
         //ERROR Condition: SUGGESTED_FINAL_POSITION < Currently Held Quantity when trade is a BUY.
-        for(Trades tradesData: tradesDataList) {
+        for (Trades tradesData : tradesDataList) {
             if ((model.getStock().equals(tradesData.getStock())) && (tradesData.getType().equals("BUY")))
                 if (model.getSugFinalPos().compareTo(model.getStockPrice()) < 0)
                     return false;
         }
         //ERROR Condition: SUGGESTED_FINAL_POSITION > Currently Held Quantity when trade is a SELL.
-        for(Trades tradesData: tradesDataList) {
+        for (Trades tradesData : tradesDataList) {
             if ((model.getStock().equals(tradesData.getStock())) && (tradesData.getType().equals("SELL")))
                 if (model.getSugFinalPos().compareTo(model.getStockPrice()) > 0)
                     return false;

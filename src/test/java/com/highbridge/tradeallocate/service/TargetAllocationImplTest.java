@@ -2,7 +2,6 @@ package com.highbridge.tradeallocate.service;
 
 import com.highbridge.tradeallocate.model.*;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,7 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.math.BigDecimal;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 class TargetAllocationImplTest {
@@ -28,7 +28,7 @@ class TargetAllocationImplTest {
     static final Integer allPos = 160;
 
     @BeforeAll
-    static void setUp(){
+    static void setUp() {
         //setting up capital model
         capital.setAccount(account);
         capital.setCapital(BigDecimal.valueOf(50000));
@@ -124,7 +124,8 @@ class TargetAllocationImplTest {
 
     @Test
     void getMaxShares() {
-        BigDecimal divide = targetAllocation.getMaxShares(targetAllocationModel.getTarMktValue(), trades.getPrice());;
+        BigDecimal divide = targetAllocation.getMaxShares(targetAllocationModel.getTarMktValue(), trades.getPrice());
+        ;
         assertEquals(divide, BigDecimal.valueOf(100));
     }
 
@@ -136,12 +137,12 @@ class TargetAllocationImplTest {
 
     @Test
     void getSugFinalPos() {
-        List<TargetAllocationModel> tarAllocModelList =  targetAllocation.getSugFinalPos(targetAllocationModelList, allPos);
+        List<TargetAllocationModel> tarAllocModelList = targetAllocation.getSugFinalPos(targetAllocationModelList, allPos);
         assertEquals(tarAllocModelList.get(0).getSugFinalPos(), BigDecimal.valueOf(160));
     }
 
     @Test
-    void setAllocations(){
+    void setAllocations() {
         List<Allocations> allocations
                 = targetAllocation.setAllocations(targetAllocMapList, tradesList);
 
