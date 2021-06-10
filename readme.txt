@@ -12,7 +12,8 @@ To run the jar file, please follow the following steps
 Mvn clean install 
 Java -jar TradeAllocate-0.0.1-SNAPSHOT.jar 
 
-The output file would be in the /tmp/ directory and output file name is: TargetAllocation.csv
+The first output file would be in the /tmp/TargetAllocations directory and output file name is: TargetAllocation.csv 
+The second output file would be in the /tmp/Allocations and output file name is: Allocations.csv
 
 2. Approach
 

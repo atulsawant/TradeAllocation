@@ -2,6 +2,7 @@ package com.highbridge.tradeallocate.service;
 
 import com.highbridge.tradeallocate.model.*;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +26,7 @@ class TargetAllocationImplTest {
     static final String account = "John";
     static final String stock = "GOOGLE";
     static final Integer allPos = 160;
+
     @BeforeAll
     static void setUp(){
         //setting up capital model
@@ -111,12 +113,6 @@ class TargetAllocationImplTest {
         assertEquals(targetAlloc.get(account).get(0).getSugFinalPos(), targetAllocationModel.getSugFinalPos());
         assertEquals(targetAlloc.get(account).get(0).getSugTradeAlloc(), targetAllocationModel.getSugTradeAlloc());
 
-        /*
-        ERROR Condition: SUGGESTED_FINAL_POSITION < 0
-            ERROR Condition: SUGGESTED_FINAL_POSITION > MAX_SHARES
-            ERROR Condition: SUGGESTED_FINAL_POSITION < Currently Held Quantity when trade is a BUY.
-            ERROR Condition: SUGGESTED_FINAL_POSITION > Currently Held Quantity when trade is a SELL.
-        */
     }
 
 
@@ -154,13 +150,9 @@ class TargetAllocationImplTest {
         assertEquals(allocations.get(0).getStock(), stock);
         assertEquals(allocations.get(0).getQuantity(), "+41");
 
-
-    }
-
-    @Test
-    void checkErrorCondition(){
         boolean checkError = targetAllocation.checkErrorCondition(targetAllocationModel, tradesList);
         assertTrue(checkError);
+
     }
 
 

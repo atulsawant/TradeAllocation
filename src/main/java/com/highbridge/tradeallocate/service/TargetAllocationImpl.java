@@ -16,10 +16,11 @@ import java.util.Map;
 public class TargetAllocationImpl implements TargetAllocation {
 
     /**
-     * @param capData
-     * @param holdData
-     * @param targetData
-     * @return
+     * @param capData Capital and account info
+     * @param holdData Holdings data for a given account with information like Stock, quantity, price and market value.
+     * @param targetData Targets data has account, stock and target percentage allocated for the account
+     * @return Map of accounts which has list of records which is filled with information extracted from
+     *          csv files like Trades, Capital, Holdings and Targets
      */
     @Override
     public Map<String, List<TargetAllocationModel>> setTarAlloc(List<Capital> capData, List<Holdings> holdData,
@@ -100,9 +101,11 @@ public class TargetAllocationImpl implements TargetAllocation {
     }
 
     /**
-     * @param preTargetAllocationMap
-     * @param tradesData
-     * @return
+     * @param preTargetAllocationMap Map of accounts which has list of records which is filled with information
+     *                               extracted from csv files like Trades, Capital, Holdings and Targets
+     * @param tradesData List of Trades data which has info like Stock, Account and target percentage.
+     * @return Map of accounts which has list of records which is filled with information extracted from
+     *         csv files like Trades, Capital, Holdings and Targets as well as calculated allocations
      */
     @Override
     public Map<String, List<TargetAllocationModel>> getTarAlloc(Map<String, List<TargetAllocationModel>> preTargetAllocationMap, List<Trades> tradesData) {
@@ -184,9 +187,9 @@ public class TargetAllocationImpl implements TargetAllocation {
     }
 
     /**
-     * @param tarPer
-     * @param capital
-     * @return
+     * @param tarPer Target Percentage for a given account for a given stock
+     * @param capital Capital amount for a given account
+     * @return Calculated Target Market Value for the given account and stock
      */
     @Override
     public BigDecimal getTarMktValue(Float tarPer, BigDecimal capital) {
@@ -194,21 +197,22 @@ public class TargetAllocationImpl implements TargetAllocation {
         return tarPer1.multiply(capital).multiply(BigDecimal.valueOf(0.01));
     }
 
-    /**
-     * @param tarMktValue
-     * @param curStockPrice
-     * @return
-     */
 
+    /**
+     *
+     * @param tarMktValue calculated target market value for a given account
+     * @param curStockPrice current stock price for a given stock
+     * @return Calculated Maxixum Share for a given account and stock
+     */
     @Override
     public BigDecimal getMaxShares(BigDecimal tarMktValue, BigDecimal curStockPrice) {
         return tarMktValue.divide(curStockPrice);
     }
 
     /**
-     * @param investors
-     * @param newTradeQty
-     * @return
+     * @param investors list of calculated allocation table for each account
+     * @param newTradeQty a trade quality allocated to be bought/sold for a given account
+     * @return calculated all in position for a given account and stock.
      */
     @Override
     public Integer getAllPositions(List<TargetAllocationModel> investors, Integer newTradeQty) {
@@ -221,9 +225,9 @@ public class TargetAllocationImpl implements TargetAllocation {
     }
 
     /**
-     * @param investors
-     * @param allPos
-     * @return
+     * @param investors list of calculated allocation table for each account
+     * @param allPos calculated all in position for a given account and stock
+     * @return calculated suggestion final position for a given account and stock
      */
 
     @Override
@@ -255,6 +259,12 @@ public class TargetAllocationImpl implements TargetAllocation {
         return investors1;
     }
 
+    /**
+     *
+     * @param targetAllocMap list of calculated allocation table for each account
+     * @param tradesDataList List of Trades retrieved from Trades csv
+     * @return Calculated for Allocation for a given account and the stock
+     */
     @Override
     public List<Allocations> setAllocations(Map<String, List<TargetAllocationModel>> targetAllocMap, List<Trades> tradesDataList) {
         final List<Allocations> allocations = new ArrayList<>();
@@ -277,6 +287,12 @@ public class TargetAllocationImpl implements TargetAllocation {
         return allocations;
     }
 
+    /**
+     *
+     * @param model Calculated target allocation for a given account and stock
+     * @param tradesDataList List of Trades retrieved from Trades csv
+     * @return true or false based on error checks condition over the calculated values.
+     */
     @Override
     public boolean checkErrorCondition(TargetAllocationModel model, List<Trades> tradesDataList){
 

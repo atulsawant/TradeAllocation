@@ -22,6 +22,14 @@ import java.util.Map;
 @Slf4j
 @Service
 public class ExtractDataSrv implements ExtractData {
+
+    /**
+     *
+     * @param type - type of model (Trades, Holdings, Targets, Capital) where we want to map the data from the csv files
+     * @param fileName - the csv file name which we need to read and map it to the model.
+     * @param <T>
+     * @return - the model (Trades, Holdings, Targets and Capital) which is filled with data extracted from the csv files
+     */
     @Override
     public <T extends Model> List<T> readCsv(Class<? extends Model> type, String fileName) {
         try {
@@ -41,10 +49,15 @@ public class ExtractDataSrv implements ExtractData {
         }
     }
 
+    /**
+     *
+     * @param targetAllocationMap is the model which write to the csv file with calculated table for each account.
+     */
     @Override
     public void writeCsv(Map<String, List<TargetAllocationModel>> targetAllocationMap) {
         List<TargetAllocationModel> finalTargetAllocList = new ArrayList<>();
 
+        try {
         targetAllocationMap.forEach(
                 (account, targetAllocationModel) -> {
                     for (TargetAllocationModel model : targetAllocationModel) {
@@ -65,7 +78,6 @@ public class ExtractDataSrv implements ExtractData {
         schema = schema.withUseHeader(true);
 
         // output writer
-        try {
             ObjectWriter myObjectWriter = mapper.writer(schema);
             File tempDir = new File("tmp/TargetAllocation");
             tempDir.mkdirs();
@@ -77,12 +89,19 @@ public class ExtractDataSrv implements ExtractData {
                     new OutputStreamWriter(bufferedOutputStream, StandardCharsets.UTF_8);
             myObjectWriter.writeValue(writerOutputStream, finalTargetAllocList);
         } catch (IOException e) {
-            log.error("IO Exception", e);
-            throw new RuntimeException(e);
+            log.error("Data is empty or unrecognised field", e);
+            throw new RuntimeException("Data is null or Data is empty or unrecognised field", e);
+        } catch (Exception e) {
+            log.error("Unknown exception occurred", e);
+            throw new RuntimeException("Unknown exception occurred" + e);
         }
 
     }
 
+    /**
+     *
+     * @param allocations is the map will be written to a csv file which has calculated allocations for each account
+     */
     @Override
     public void writeCsvAlloc(List<Allocations> allocations){
 
@@ -101,7 +120,7 @@ public class ExtractDataSrv implements ExtractData {
             ObjectWriter myObjectWriter = mapper.writer(schema);
             File tempDir = new File("tmp/Allocations");
             tempDir.mkdirs();
-            File tempFile = new File(tempDir, "Allocations.csv");
+            File tempFile = new File(tempDir, "allocations.csv");
             FileOutputStream tempFileOutputStream = new FileOutputStream(tempFile);
             BufferedOutputStream bufferedOutputStream =
                     new BufferedOutputStream(tempFileOutputStream, 1024);
